@@ -3,14 +3,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import ROUTES from "../app/routes";
-import { selectTopics } from "../features/topics/topicsSlice"; // Import topics selector
-import { addQuiz } from "../features/quizzes/quizzesSlice"; // Import addQuiz action
+import { selectTopics } from "../features/topics/topicsSlice";
+import { addQuiz } from "../features/quizzes/quizzesSlice";
+import { addCard } from "../features/cards/cardsSlice";
 
 export default function NewQuizForm() {
   const [name, setName] = useState("");
+  const [cards, setCards] = useState([]);
   const [topicId, setTopicId] = useState("");
   const navigate = useNavigate();
-  const topics = useSelector(selectTopics); // Fetch topics from the state
+  const topics = useSelector(selectTopics);
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -19,20 +21,45 @@ export default function NewQuizForm() {
       return;
     }
 
-    const quizId = uuidv4(); // Generate a unique ID for the quiz
+    const cardIds = [];
 
-    // Dispatch addQuiz action with the necessary payload
+    // Create cards and collect their IDs
+    cards.forEach((card) => {
+      const cardId = uuidv4();
+      cardIds.push(cardId);
+      dispatch(addCard({ ...card, id: cardId }));
+    });
+
+    const quizId = uuidv4();
+
+    // Dispatch addQuiz action with the collected cardIds
     dispatch(
       addQuiz({
         id: quizId,
         name,
         topicId,
-        cardIds: [], // Empty array for card IDs for now
+        cardIds, // Use the collected cardIds array
       })
     );
 
     // Redirect to the quizzes page after creation
     navigate(ROUTES.quizzesRoute());
+  };
+
+  const addCardInputs = (e) => {
+    e.preventDefault();
+    setCards(cards.concat({ front: "", back: "" }));
+  };
+
+  const removeCard = (e, index) => {
+    e.preventDefault();
+    setCards(cards.filter((card, i) => index !== i));
+  };
+
+  const updateCardState = (index, side, value) => {
+    const newCards = [...cards];
+    newCards[index][side] = value;
+    setCards(newCards);
   };
 
   return (
@@ -61,7 +88,36 @@ export default function NewQuizForm() {
             </option>
           ))}
         </select>
+        {cards.map((card, index) => (
+          <div key={index} className="card-front-back">
+            <input
+              id={`card-front-${index}`}
+              value={cards[index].front}
+              onChange={(e) =>
+                updateCardState(index, "front", e.currentTarget.value)
+              }
+              placeholder="Front"
+            />
+
+            <input
+              id={`card-back-${index}`}
+              value={cards[index].back}
+              onChange={(e) =>
+                updateCardState(index, "back", e.currentTarget.value)
+              }
+              placeholder="Back"
+            />
+
+            <button
+              onClick={(e) => removeCard(e, index)}
+              className="remove-card-button"
+            >
+              Remove Card
+            </button>
+          </div>
+        ))}
         <div className="actions-container">
+          <button onClick={addCardInputs}>Add a Card</button>
           <button type="submit">Create Quiz</button>
         </div>
       </form>
