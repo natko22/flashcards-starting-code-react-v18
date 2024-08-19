@@ -17,9 +17,24 @@ export default function NewQuizForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("handleSubmit is triggered");
+
+    console.log("Name:", name);
+    console.log("Topic ID:", topicId);
+
+    if (name.length === 0) {
+      console.log("Quiz name is missing");
+    }
+    if (topicId.length === 0) {
+      console.log("Topic ID is missing");
+    }
+
     if (name.length === 0 || topicId.length === 0) {
+      console.log("Form validation failed");
       return;
     }
+
+    console.log("Form validation passed");
 
     const cardIds = [];
 
@@ -27,10 +42,13 @@ export default function NewQuizForm() {
     cards.forEach((card) => {
       const cardId = uuidv4();
       cardIds.push(cardId);
+      console.log("Dispatching addCard:", { ...card, id: cardId });
+
       dispatch(addCard({ ...card, id: cardId }));
     });
 
     const quizId = uuidv4();
+    console.log("Dispatching addQuiz:", { id: quizId, name, topicId, cardIds });
 
     // Dispatch addQuiz action with the collected cardIds
     dispatch(
@@ -75,7 +93,8 @@ export default function NewQuizForm() {
         />
         <select
           id="quiz-topic"
-          onChange={(e) => setTopicId(e.currentTarget.value)}
+          value={topicId} // Controlled component, ensures value is linked to state
+          onChange={(e) => setTopicId(e.currentTarget.value)} // Updates state on selection
           placeholder="Topic"
           required
         >

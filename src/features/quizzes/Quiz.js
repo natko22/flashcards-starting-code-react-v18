@@ -6,11 +6,19 @@ import ROUTES from "../../app/routes";
 import { selectQuizzes } from "./quizzesSlice"; // Import the quiz selector
 
 export default function Quiz() {
-  const quizzes = useSelector(selectQuizzes); // Fetch all quizzes from the state
+  console.log("Quiz component is rendering");
+
+  const quizzes = useSelector(selectQuizzes);
+  console.log("Quizzes in state:", quizzes);
+
   const { quizId } = useParams();
+  console.log("quizId from URL:", quizId);
+
   const quiz = quizzes[quizId];
+  console.log("Quiz found:", quiz);
 
   if (!quiz) {
+    console.log("No quiz found, redirecting...");
     return <Navigate to={ROUTES.quizzesRoute()} replace />;
   }
 
