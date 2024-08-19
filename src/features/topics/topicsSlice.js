@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { addQuiz } from "../quizzes/quizzesSlice"; // Import the addQuiz action
 
 // Initial state
 const initialState = {
@@ -19,6 +20,12 @@ const topicsSlice = createSlice({
         quizIds: [], // Initialize with an empty array for quiz IDs
       };
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(addQuiz, (state, action) => {
+      const { id, topicId } = action.payload;
+      state.topics[topicId].quizIds.push(id); // Add the quiz ID to the topic's quizIds array
+    });
   },
 });
 
